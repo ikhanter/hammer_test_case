@@ -24,12 +24,12 @@ class DetailAPIView(APIView):
         referrals = User.objects.filter(users_referrals__referrer=request.user).values('phone_number')
         referrals_serializer = UserSerializer(referrals, many=True)
 
-        referrer = User.objects.get(users_referrers__referral=request.user)
+        referrer = User.objects.filter(users_referrers__referral=request.user).values('phone_number')
         referrer_serializer = UserSerializer(referrer)
         return Response({
             'user': serializer.data,
             'referrals': referrals_serializer.data,
-            'referrer': referrer_serializer.data['phone_number'],
+            'referrer': referrer_serializer.data,
         })
 
     def post(self, request, *args, **kwargs):
