@@ -5,7 +5,7 @@ install:
 	poetry install
 
 start:
-	poetry run gunicorn task_manager.wsgi
+	poetry run gunicorn hammer_test_case.wsgi
 
 build:
 	./build.sh
