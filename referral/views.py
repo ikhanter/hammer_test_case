@@ -17,7 +17,6 @@ from referral.serializers import UserSerializer, ConfirmationCodeSerializer, Ref
 from referral.services import generate_confirmation_code
 
 # Create your views here.
-@csrf_exempt
 class DetailAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
@@ -36,6 +35,7 @@ class DetailAPIView(APIView):
             })
         return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             try:
