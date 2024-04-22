@@ -11,9 +11,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
 
 from referral.backend import PhoneNumberBackend
 from referral.models import User, ConfirmationCode, ReferredUsers
@@ -75,18 +72,14 @@ class IndexUsersAPIView(
                 used_backend = backend
                 break
         user = used_backend.authenticate(request=request, phone_number=phone_number)
-        token, created = Token.objects.get_or_create(user=user)
-        response = Response()
-        response.set_cookie(key='token', value=token.key)
-        response.data = {'token': token.key}
-        
+        login(request, user, backend='referral.backend.PhoneNumberBackend')
         try:
             conf_code_row = ConfirmationCode.objects.get(user=user)
         except ObjectDoesNotExist:
             time.sleep(1)
             conf_code = generate_confirmation_code()
             ConfirmationCode.objects.create(user=user, conf_code=conf_code)
-        return response
+        return redirect(reverse_lazy('confirm_endpoint'))
 
 
 class LogoutView(APIView):

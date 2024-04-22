@@ -16,10 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+
 
 
 from referral.views import IndexUsersAPIView, ConfirmCodeAPIView, DetailAPIView, LogoutView
@@ -30,6 +27,4 @@ urlpatterns = [
     path('me/', DetailAPIView.as_view(), name='me'),
     path('confirm/', ConfirmCodeAPIView.as_view(), name='confirm_endpoint'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

@@ -39,18 +39,12 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     phone_number = models.CharField(max_length=20, unique=True)
     code = models.CharField(max_length=6, unique=True, editable=False)
+    password = None
 
     is_confirmed = models.BooleanField(default=False)
-
     objects = UserManager()
 
     USERNAME_FIELD = 'phone_number'
-
-    def has_usable_password(self):
-        return False
-
-    def set_password(self, raw_password):
-        pass
 
 
 class ConfirmationCode(models.Model):
