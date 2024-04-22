@@ -11,6 +11,9 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 
 from referral.backend import PhoneNumberBackend
 from referral.models import User, ConfirmationCode, ReferredUsers
@@ -51,7 +54,9 @@ class DetailAPIView(APIView):
         return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-class IndexUsersAPIView(generics.GenericAPIView):
+class IndexUsersAPIView(
+    generics.GenericAPIView,
+    ):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -60,8 +65,6 @@ class IndexUsersAPIView(generics.GenericAPIView):
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        token = get_token(request)
-        headers = {'X-CSRFToken': token}
         serializer = self.get_serializer(data=request.data)
         phone_number = request.data.get('phone_number')
         if serializer.is_valid():
@@ -71,13 +74,11 @@ class IndexUsersAPIView(generics.GenericAPIView):
             if isinstance(backend, PhoneNumberBackend):
                 used_backend = backend
                 break
-        if request.user.is_authenticated:
-            logout(request)
         user = used_backend.authenticate(request=request, phone_number=phone_number)
-        login(request, user, backend='referral.backend.PhoneNumberBackend')
-
-        if user.is_confirmed:  
-            return redirect(reverse_lazy('me'))
+        token, created = Token.objects.get_or_create(user=user)
+        response = Response()
+        response.set_cookie(key='token', value=token.key)
+        response.data = {'token': token.key}
         
         try:
             conf_code_row = ConfirmationCode.objects.get(user=user)
@@ -85,15 +86,12 @@ class IndexUsersAPIView(generics.GenericAPIView):
             time.sleep(1)
             conf_code = generate_confirmation_code()
             ConfirmationCode.objects.create(user=user, conf_code=conf_code)
-
-        response = redirect(reverse_lazy('confirm_endpoint'))
-        response['X-CSRFToken'] = token
         return response
 
 
 class LogoutView(APIView):
     def post(self, request):
-        logout(request)
+        del request.COOKIES['token']
         return HttpResponseRedirect(redirect_to='')
 
 

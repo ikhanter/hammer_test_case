@@ -46,6 +46,12 @@ class User(AbstractBaseUser):
 
     USERNAME_FIELD = 'phone_number'
 
+    def has_usable_password(self):
+        return False
+
+    def set_password(self, raw_password):
+        pass
+
 
 class ConfirmationCode(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='confirmation_codes')
