@@ -35,7 +35,6 @@ class DetailAPIView(APIView):
             })
         return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             try:
@@ -59,7 +58,6 @@ class IndexUsersAPIView(generics.GenericAPIView):
         serializer = self.get_serializer(self.get_queryset(), many=True)
         return Response(serializer.data)
 
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         phone_number = request.data.get('phone_number')
