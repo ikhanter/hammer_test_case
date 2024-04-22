@@ -4,6 +4,7 @@ from django.contrib.auth import get_backends, login, logout
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.http.response import HttpResponseRedirect
+from django.middleware.csrf import get_token
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -43,7 +44,7 @@ class DetailAPIView(APIView):
                 return Response('Referral code doesn\'t exist.', status=status.HTTP_400_BAD_REQUEST)       
             if ReferredUsers.objects.filter(referral=request.user).exists():
                 return Response('You already registered referral code.', status=status.HTTP_400_BAD_REQUEST)
-            if request.user.is_confirmed and referrer['is_confirmed']:
+            if request.user.is_confirmed and referrer.is_confirmed:
                 ReferredUsers.objects.create(referrer=referrer, referral=request.user)
                 return redirect(reverse_lazy('me'))
             return Response({'message': 'You or referrer is not confirmed.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -59,6 +60,8 @@ class IndexUsersAPIView(generics.GenericAPIView):
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
+        token = get_token(request)
+        headers = {'X-CSRFToken': token}
         serializer = self.get_serializer(data=request.data)
         phone_number = request.data.get('phone_number')
         if serializer.is_valid():
@@ -83,7 +86,9 @@ class IndexUsersAPIView(generics.GenericAPIView):
             conf_code = generate_confirmation_code()
             ConfirmationCode.objects.create(user=user, conf_code=conf_code)
 
-        return redirect(reverse_lazy('confirm_endpoint'))
+        response = redirect(reverse_lazy('confirm_endpoint'))
+        response['X-CSRFToken'] = token
+        return response
 
 
 class LogoutView(APIView):
