@@ -59,6 +59,7 @@ class IndexUsersAPIView(generics.GenericAPIView):
         serializer = self.get_serializer(self.get_queryset(), many=True)
         return Response(serializer.data)
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         phone_number = request.data.get('phone_number')
