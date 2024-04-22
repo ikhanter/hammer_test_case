@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     'hammer-test-case.onrender.com',
     'webserver',
     '127.0.0.1',
+    'localhost',
 ]
 
 

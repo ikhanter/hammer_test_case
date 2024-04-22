@@ -19,28 +19,34 @@ from referral.services import generate_confirmation_code
 class DetailAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
-        serializer = UserSerializer(request.user)
+        if request.user.is_authenticated:
+            serializer = UserSerializer(request.user)
 
-        referrals = User.objects.filter(users_referrals__referrer=request.user).values('phone_number')
-        referrals_serializer = UserSerializer(referrals, many=True)
+            referrals = User.objects.filter(users_referrals__referrer=request.user).values('phone_number')
+            referrals_serializer = UserSerializer(referrals, many=True)
 
-        referrer = User.objects.filter(users_referrers__referral=request.user).values('phone_number')
-        referrer_serializer = UserSerializer(referrer, many=True)
-        return Response({
-            'user': serializer.data,
-            'referrals': referrals_serializer.data,
-            'referrer': referrer_serializer.data,
-        })
+            referrer = User.objects.filter(users_referrers__referral=request.user).values('phone_number')
+            referrer_serializer = UserSerializer(referrer, many=True)
+            return Response({
+                'user': serializer.data,
+                'referrals': referrals_serializer.data,
+                'referrer': referrer_serializer.data,
+            })
+        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request, *args, **kwargs):
-        try:
-            referrer = User.objects.get(code=request.data.get('code'))
-        except ObjectDoesNotExist:
-            return Response('Referral code doesn\'t exist.', status=status.HTTP_400_BAD_REQUEST)       
-        if ReferredUsers.objects.filter(referral=request.user).exists():
-            return Response('You already registered referral code.', status=status.HTTP_400_BAD_REQUEST)
-        ReferredUsers.objects.create(referrer=referrer, referral=request.user)
-        return redirect(reverse_lazy('me'))
+        if request.user.is_authenticated:
+            try:
+                referrer = User.objects.get(code=request.data.get('code'))
+            except ObjectDoesNotExist:
+                return Response('Referral code doesn\'t exist.', status=status.HTTP_400_BAD_REQUEST)       
+            if ReferredUsers.objects.filter(referral=request.user).exists():
+                return Response('You already registered referral code.', status=status.HTTP_400_BAD_REQUEST)
+            if request.user.is_confirmed and referrer['is_confirmed']:
+                ReferredUsers.objects.create(referrer=referrer, referral=request.user)
+                return redirect(reverse_lazy('me'))
+            return Response({'message': 'You or referrer is not confirmed.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class IndexUsersAPIView(generics.GenericAPIView):
@@ -87,24 +93,28 @@ class ConfirmCodeAPIView(generics.GenericAPIView):
     serializer_class = ConfirmationCodeSerializer
 
     def get(self, request, *args, **kwargs):
-        return Response('Send POST-request to this endpoint with 4-digits confirmation code. Example: {\'conf_code\': 1234}')
+        if request.user.is_authenticated:
+            return Response('Send POST-request to this endpoint with 4-digits confirmation code. Example: {\'conf_code\': 1234}')
+        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data={'conf_code': request.data.get('conf_code')})
-        serializer.is_valid(raise_exception=True)
-        user = request.user
-        conf_code = serializer.validated_data['conf_code']
+        if request.user.is_authenticated:
+            serializer = self.get_serializer(data={'conf_code': request.data.get('conf_code')})
+            serializer.is_valid(raise_exception=True)
+            user = request.user
+            conf_code = serializer.validated_data['conf_code']
 
-        try:
-            confirmation_code = ConfirmationCode.objects.get(
-                user=user,
-                # conf_code=conf_code,
-            )
-        except ConfirmationCode.DoesNotExist:
-            return Response({'message': 'Invalid confirmation code'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        confirmation_code.delete()
-        user.is_confirmed = True
-        user.save(update_fields=['is_confirmed'])
+            try:
+                confirmation_code = ConfirmationCode.objects.get(
+                    user=user,
+                    # conf_code=conf_code,
+                )
+            except ConfirmationCode.DoesNotExist:
+                return Response({'message': 'Invalid confirmation code'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            confirmation_code.delete()
+            user.is_confirmed = True
+            user.save(update_fields=['is_confirmed'])
 
-        return redirect(reverse_lazy('me'))
+            return redirect(reverse_lazy('me'))
+        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
