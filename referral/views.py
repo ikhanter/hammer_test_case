@@ -68,6 +68,8 @@ class IndexUsersAPIView(generics.GenericAPIView):
             if isinstance(backend, PhoneNumberBackend):
                 used_backend = backend
                 break
+        if request.user.is_authenticated:
+            logout(request)
         user = used_backend.authenticate(request=request, phone_number=phone_number)
         login(request, user, backend='referral.backend.PhoneNumberBackend')
 
