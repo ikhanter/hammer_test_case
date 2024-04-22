@@ -21,7 +21,7 @@ from referral.services import generate_confirmation_code
 
 # Create your views here.
 class DetailAPIView(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    authentication_classes = [SessionAuthentication, BasicAuthentication, PhoneNumberBackend]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
