@@ -28,7 +28,11 @@ SECRET_KEY = SECRET_KEY
 
 DEBUG = DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'hammer-test-case.onrender.com',
+    'webserver',
+    '127.0.0.1',
+]
 
 
 # Application definition
