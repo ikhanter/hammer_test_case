@@ -25,7 +25,7 @@ class DetailAPIView(APIView):
         referrals_serializer = UserSerializer(referrals, many=True)
 
         referrer = User.objects.filter(users_referrers__referral=request.user).values('phone_number')
-        referrer_serializer = UserSerializer(referrer)
+        referrer_serializer = UserSerializer(referrer, many=True)
         return Response({
             'user': serializer.data,
             'referrals': referrals_serializer.data,
@@ -33,7 +33,6 @@ class DetailAPIView(APIView):
         })
 
     def post(self, request, *args, **kwargs):
-        print(request.user)
         try:
             referrer = User.objects.get(code=request.data.get('code'))
         except ObjectDoesNotExist:

@@ -81,21 +81,28 @@ WSGI_APPLICATION = 'hammer_test_case.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-from hammer_test_case.config import DB_NAME, DB_PORT, DB_HOST, DB_PASSWORD, DB_USER
+from hammer_test_case.config import DB_NAME, DB_PORT, DB_HOST, DB_PASSWORD, DB_USER, POSTGRESQL
 
-DATABASES = {
-    'default': {
-        'NAME': DB_NAME,
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': DB_HOST,
-        'PORT':DB_PORT,
-        'ENGINE': 'django.db.backends.postgresql',
-        'CONN_MAX_AGE': 600,
-        'CONN_HEALTH_CHECKKS': True,
+if POSTGRESQL:
+    DATABASES = {
+        'default': {
+            'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASSWORD,
+            'HOST': DB_HOST,
+            'PORT':DB_PORT,
+            'ENGINE': 'django.db.backends.postgresql',
+            'CONN_MAX_AGE': 600,
+            'CONN_HEALTH_CHECKKS': True,
+        }
     }
-}
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
