@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +17,7 @@ from referral.serializers import UserSerializer, ConfirmationCodeSerializer, Ref
 from referral.services import generate_confirmation_code
 
 # Create your views here.
+@csrf_exempt
 class DetailAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
