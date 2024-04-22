@@ -11,6 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from referral.backend import PhoneNumberBackend
 from referral.models import User, ConfirmationCode, ReferredUsers
@@ -19,6 +21,8 @@ from referral.services import generate_confirmation_code
 
 # Create your views here.
 class DetailAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
