@@ -96,7 +96,8 @@ class ConfirmCodeAPIView(generics.GenericAPIView):
         if request.user.is_authenticated:
             return Response('Send POST-request to this endpoint with 4-digits confirmation code. Example: {\'conf_code\': 1234}')
         return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-
+    
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             serializer = self.get_serializer(data={'conf_code': request.data.get('conf_code')})
