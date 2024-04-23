@@ -21,25 +21,25 @@ from referral.services import generate_confirmation_code
 
 # Create your views here.
 class DetailAPIView(APIView):
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (AllowAny,)
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            serializer = UserSerializer(request.user)
+        serializer = UserSerializer(request.user)
 
-            referrals = User.objects.filter(users_referrals__referrer=request.user).values('phone_number')
-            referrals_serializer = UserSerializer(referrals, many=True)
+        referrals = User.objects.filter(users_referrals__referrer=request.user).values('phone_number')
+        referrals_serializer = UserSerializer(referrals, many=True)
 
-            referrer = User.objects.filter(users_referrers__referral=request.user).values('phone_number')
-            referrer_serializer = UserSerializer(referrer, many=True)
-            return Response({
-                'user': serializer.data,
-                'referrals': referrals_serializer.data,
-                'referrer': referrer_serializer.data,
-            })
-        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        referrer = User.objects.filter(users_referrers__referral=request.user).values('phone_number')
+        referrer_serializer = UserSerializer(referrer, many=True)
+        return Response({
+            'user': serializer.data,
+            'referrals': referrals_serializer.data,
+            'referrer': referrer_serializer.data,
+        })
+        # return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
             try:
                 referrer = User.objects.get(code=request.data.get('code'))
             except ObjectDoesNotExist:
@@ -50,7 +50,7 @@ class DetailAPIView(APIView):
                 ReferredUsers.objects.create(referrer=referrer, referral=request.user)
                 return redirect(reverse_lazy('me'))
             return Response({'message': 'You or referrer is not confirmed.'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        # return Response({'message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class IndexUsersAPIView(
