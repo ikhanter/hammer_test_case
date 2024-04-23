@@ -76,13 +76,15 @@ class IndexUsersAPIView(
                 break
         user = used_backend.authenticate(request=request, phone_number=phone_number)
         login(request, user, backend='referral.backend.PhoneNumberBackend')
-        try:
-            conf_code_row = ConfirmationCode.objects.get(user=user)
-        except ObjectDoesNotExist:
-            time.sleep(1)
-            conf_code = generate_confirmation_code()
-            ConfirmationCode.objects.create(user=user, conf_code=conf_code)
-        return redirect(reverse_lazy('confirm_endpoint'))
+        if not user.is_confirmed:
+            try:
+                conf_code_row = ConfirmationCode.objects.get(user=user)
+            except ObjectDoesNotExist:
+                time.sleep(1)
+                conf_code = generate_confirmation_code()
+                ConfirmationCode.objects.create(user=user, conf_code=conf_code)
+                return redirect(reverse_lazy('confirm_endpoint'))
+        return redirect(reverse_lazy('me'))
 
 
 class LogoutView(APIView):
