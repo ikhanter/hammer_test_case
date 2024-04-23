@@ -1,5 +1,19 @@
 # About
-Task Manager is the web-service for organizing tasks between registered users. Each task must have status, executor, and optionally labels (m2m). All content (statuses, labels) creates by users themselves and can be updated by creators. If status, label or user are linked with tasks, they are unavailable for deleting.
+Referral system API.
+API with authorization by phone-number, imitating confirmation code, possibility to set referrer for yourself only once.
+
+### Routes
+- /
+  - GET - List of all numbers with codes
+  - POST - {"phone_number": "+..."} - Login into service by a phone number. If it doesn't exist - create new user and login
+- /confirm/
+  - GET - Information about neccessarity to send POST
+  - POST - {"conf_code": XXXX} - send confirmation code (any 4 digits are acceptable, generator is included)
+- /me/
+  - GET - User info
+  - POST - {"code": XXXXXX} - Set your referrer. Only existing codes areexxeptable. Both users must be confirmed for referring
+- /logout/
+  - POST - Logout
 
 # System requirements
 #### PL, Virtual Environment, DBMS
