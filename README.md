@@ -1,6 +1,7 @@
 # About
 Referral system API.
 API with authorization by phone-number, imitating confirmation code, possibility to set referrer for yourself only once.
+User can get a lot of referrals, but only one referrer.
 
 ### Routes
 - /
