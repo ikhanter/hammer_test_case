@@ -9,12 +9,10 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from referral.backend import PhoneNumberBackend
 from referral.models import User, ConfirmationCode, ReferredUsers
-from referral.serializers import UserSerializer, ConfirmationCodeSerializer, ReferralSerializer
+from referral.serializers import UserSerializer, ConfirmationCodeSerializer
 from referral.services import generate_confirmation_code
 
 # Create your views here.
