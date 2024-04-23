@@ -11,7 +11,7 @@ API with authorization by phone-number, imitating confirmation code, possibility
   - POST - {"conf_code": XXXX} - send confirmation code (any 4 digits are acceptable, generator is included)
 - /me/
   - GET - User info
-  - POST - {"code": XXXXXX} - Set your referrer. Only existing codes areexxeptable. Both users must be confirmed for referring
+  - POST - {"code": XXXXXX} - Set your referrer. Only existing codes are acceptable. Both users must be confirmed for referring
 - /logout/
   - POST - Logout
 
