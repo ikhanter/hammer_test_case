@@ -2,11 +2,9 @@ import time
 
 from django.contrib.auth import get_backends, login, logout
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
 from django.http.response import HttpResponseRedirect
-from django.middleware.csrf import get_token
 from django.shortcuts import redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -89,7 +87,7 @@ class IndexUsersAPIView(
 
 class LogoutView(APIView):
     def post(self, request):
-        del request.COOKIES['token']
+        logout(request)
         return HttpResponseRedirect(redirect_to='')
 
 
